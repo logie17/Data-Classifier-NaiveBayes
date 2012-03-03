@@ -6,26 +6,27 @@ use 5.008008;
 has 'stemmer' => (
     is => 'rw',
     lazy_build => 1,
-    handles => ['stem_in_place']
-);
+    handles => ['stem_in_place']);
 
 has 'stemming' => (
-    is => 'rw',
-);
+    is => 'rw',);
 
 has lang => (
     is => 'rw',
-    default => sub { 'en' }
-);
+    default => sub { 'en' });
 
 sub _build_stemmer { return Lingua::Stem::Snowball->new(lang => $_[0]->lang) } 
 
 sub words {
-    my ($self, $string) = @_;
+    my ($self, $string, $token_callback) = @_;
 
     my @words = map { lc $_ } $string =~ /(\w+(?:[-']\w+)*)/g;
 
     $self->stemmer->stem_in_place(\@words) if $self->stemming;
+
+    if ( $token_callback && ref $token_callback eq 'CODE' ) {
+        @words = map { &{$token_callback}($_) } @words;
+    }
 
     return \@words;
 }
