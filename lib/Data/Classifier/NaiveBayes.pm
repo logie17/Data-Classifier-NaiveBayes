@@ -4,6 +4,15 @@ use MooseX::Types::LoadableClass qw(LoadableClass);
 use List::Util qw(reduce sum);
 use 5.008008;
 
+has categories => (
+    is => 'rw',
+    default => sub { {} });
+
+# Need to implement
+has thresholds => (
+    is => 'rw',
+    default => sub { {} });
+
 has tokenizer => (
     is => 'rw',
     lazy_build => 1);
@@ -14,15 +23,7 @@ has tokenizer_class => (
     default => 'Data::Classifier::NaiveBayes::Tokenizer',
     coerce => 1);
 
-has 'words' => (
-    is => 'rw',
-    default => sub { {} });
-
-has 'categories' => (
-    is => 'rw',
-    default => sub { {} });
-
-has 'thresholds' => (
+has words => (
     is => 'rw',
     default => sub { {} });
 
@@ -50,7 +51,7 @@ sub doc_prob {
 sub word_prob {
     my ($self, $word, $cat ) = @_;
     return 0.0 if $self->cat_count($cat) == 0;
-    sprintf("%.2f", $self->word_count($word, $cat) / $self->cat_count($cat));
+    return sprintf("%.2f", $self->word_count($word, $cat) / $self->cat_count($cat));
 }
 
 sub word_count {
@@ -152,10 +153,42 @@ Data::Classifier::NaiveBayes
 
 =head1 SYNOPSIS
 
+    my $classifier = Data::Classifier::NaiveBayes->new;
+
+    $classifier->train('token', "Some text to train with");
+    print $classifier->classify("Some text to find a match");
 
 =head1 DESCRIPTION
 
-L<Data::Classifier::NaiveBayes> 
+This a Naive Bayes classifer. The code for this project is largely based off
+of the work done by alexandru's stuff-classifier originally written in Ruby.
+
+    https://github.com/alexandru/stuff-classifier
+
+The code was ported over to Perl and L<Moose>. 
+
+For more information please see the following:
+
+    http://bionicspirit.com/blog/2012/02/09/howto-build-naive-bayes-classifier.html
+
+
+=head1 ATTRIBUTES
+
+=head2 tokenizer
+
+An access to L<Data::Classifier::NaiveBayes::Tokenizer>.
+
+=head2 tokenizer_class
+
+A string to the tokenizer class name.
+
+=head2 words($hash_ref)
+
+A key value pair of word counts by categories
+
+=head2 categories($hash_ref)
+
+A key value pair of catogory counts.
 
 =head1 METHODS
 
