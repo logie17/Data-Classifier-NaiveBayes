@@ -39,11 +39,12 @@ sub total_count {
 }
 
 sub doc_prob {
-    my ($self, $text, $category) = @_;
+    my ($self, $text, $cat) = @_;
 
-    $self->tokenizer->words($text, sub{
+    return reduce { $a * $b } @{$self->tokenizer->words($text, sub{
         my $word = shift;
-    });
+        return $self->word_weighted_average($word, $cat);
+    })};
 }
 
 sub word_prob {
@@ -66,14 +67,13 @@ sub word_weighted_average {
 
     # calculate current probability
     my $basic_prob = $self->word_prob($word, $cat);
-  
+
     # count the number of times this word has appeared in all
     # categories
     my $totals = sum map { $self->word_count($word, $_) } keys $self->categories;
   
     # the final weighted average
-    return ($weight * $assumed_prob + $totals * $basic_prob) / ($weight +
-    $totals);
+    return ($weight * $assumed_prob + $totals * $basic_prob) / ($weight + $totals);
 }
 
 sub cat_scores {
@@ -82,15 +82,15 @@ sub cat_scores {
     my $probs = {};
 
     for my $cat (keys %{$self->categories}) {
-        $probs->{$cat} = $self->text_prop($text, $cat);
+        $probs->{$cat} = $self->text_prop($cat, $text);
     }
 
     return sort { $a->[1] <=> $b->[1] } map { [$_, $probs->{$_} ] } keys %{$probs};
 }
 
 sub text_prop {
-    my ($self, $text, $cat) = @_;
-    my $cat_prob = $self->cat_count($cat) / $self->total_count;
+    my ($self, $cat, $text) = @_;
+    my $cat_prob = ($self->cat_count($cat) / $self->total_count);
     my $doc_prob = $self->doc_prob($text, $cat);
     return $cat_prob * $doc_prob;
 }
@@ -101,9 +101,9 @@ sub classify {
     my $max_prob = 0.0;
     my $best = undef;
 
-    my $scores = $self->cat_scores($text);
+    my @scores = $self->cat_scores($text);
 
-    for my $score ( @{$scores} ) {
+    for my $score ( @scores) {
         my ( $cat, $prob ) = @{$score};
         if ( $prob > $max_prob ) {
             $max_prob = $prob;
@@ -114,10 +114,10 @@ sub classify {
     return $default unless $best;
     my $threshold = $self->thresholds->{$best} || 1.0;
 
-    for my $score ( @{$scores} ) {
+    for my $score ( @scores ) {
         my ( $cat, $prob ) = @{$score};
 
-        next if $cat == $best;
+        next if $cat eq $best;
         return $default if $prob * $threshold > $max_prob;
     }
 
