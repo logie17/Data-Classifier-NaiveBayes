@@ -161,7 +161,7 @@ L<Data::Classifier::NaiveBayes>
 
 =head1 SEE ALSO
 
-L<Moo> 
+L<Moose> 
 
 =head1 AUTHOR
 
