@@ -99,6 +99,8 @@ Data::Classifier::NaiveBayes
 
 =head1 SYNOPSIS
 
+    my $tokenizer = Data::Classifier::NaiveBayes::Tokenizer->new;
+    say @{$tokenizer->words("Hello World")};
 
 =head1 DESCRIPTION
 
@@ -108,7 +110,7 @@ L<Data::Classifier::NaiveBayes>
 
 =head1 SEE ALSO
 
-L<Moo> 
+L<Moose>, L<Lingua::Stem::Snowball>
 
 =head1 AUTHOR
 
