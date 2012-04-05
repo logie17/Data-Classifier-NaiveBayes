@@ -1,4 +1,7 @@
-Revision history for Catalyst::Model::Lucy
+Revision history for Data-Classifier-NaiveBayes
 
 0.001   02 April 2012
         - initial release
+
+0.002   02 April 2012
+        - Fixed some minor documentation errors.
