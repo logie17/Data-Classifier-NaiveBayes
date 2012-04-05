@@ -103,7 +103,7 @@ sub _word_weighted_average {
 
     # count the number of times this word has appeared in all
     # categories
-    my $totals = sum map { $self->_word_count($word, $_) } keys $self->categories;
+    my $totals = sum map { $self->_word_count($word, $_) } keys %{$self->categories};
   
     # the final weighted average
     return ($weight * $assumed_prob + $totals * $basic_prob) / ($weight + $totals);
